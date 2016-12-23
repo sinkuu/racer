@@ -381,7 +381,7 @@ fn find_type_match(path: &core::Path, fpath: &Path, pos: usize, session: &Sessio
     let res = resolve_path_with_str(path, fpath, pos, core::SearchType::ExactMatch,
                core::Namespace::Type, session).nth(0).and_then(|m| {
                    match m.mtype {
-                       MatchType::Type => get_type_of_typedef(m, session, fpath),
+                       MatchType::Type => get_type_of_typedef(m, session),
                        _ => Some(m)
                    }
                });
@@ -405,7 +405,7 @@ fn find_type_match(path: &core::Path, fpath: &Path, pos: usize, session: &Sessio
     })
 }
 
-fn get_type_of_typedef(m: Match, session: &Session, fpath: &Path) -> Option<Match> {
+fn get_type_of_typedef(m: Match, session: &Session) -> Option<Match> {
     debug!("get_type_of_typedef match is {:?}", m);
     let msrc = session.load_file_and_mask_comments(&m.filepath);
     let blobstart = m.point - 5;  // - 5 because 'type '
@@ -418,12 +418,17 @@ fn get_type_of_typedef(m: Match, session: &Session, fpath: &Path) -> Option<Matc
         debug!("get_type_of_typedef parsed type {:?}", res.type_);
         res.type_
     }).and_then(|type_| {
-        let src = session.load_file(fpath);
+        let src = session.load_file(&m.filepath);
         let scope_start = scopes::scope_start(src.as_src(), m.point);
         // Type of TypeDef cannot be inside the impl block so look outside
-        let outer_scope_start = scopes::scope_start(src.as_src(), scope_start - 1);
-        nameres::resolve_path_with_str(&type_, &m.filepath, outer_scope_start, core::SearchType::ExactMatch,
-                                       core::Namespace::Type, session).nth(0)
+        let outer_scope_start = scope_start.checked_sub(1)
+            .map(|sub| scopes::scope_start(src.as_src(), sub));
+        nameres::resolve_path_with_str(&type_,
+                                       &m.filepath,
+                                       outer_scope_start.unwrap_or(scope_start),
+                                       core::SearchType::ExactMatch,
+                                       core::Namespace::Type,
+                                       session).nth(0)
     })
 }
 
