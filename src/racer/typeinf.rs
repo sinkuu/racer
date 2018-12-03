@@ -375,7 +375,7 @@ pub fn get_struct_field_type(
     } else {
         (*get_first_stmt(src.as_src().shift_start(opoint))).to_owned()
     };
-    let fields = ast::parse_struct_fields(structsrc.to_owned(), Scope::from_match(structmatch));
+    let fields = ast::parse_struct_fields(structsrc, Scope::from_match(structmatch));
     for (field, _, ty) in fields {
         if fieldname != field {
             continue;

@@ -547,7 +547,7 @@ pub fn get_rust_src_path() -> Result<path::PathBuf, RustSrcPathError> {
 
 fn validate_rust_src_path(path: path::PathBuf) -> Result<path::PathBuf, RustSrcPathError> {
     if !path.exists() {
-        Err(RustSrcPathError::DoesNotExist(path.to_path_buf()))
+        Err(RustSrcPathError::DoesNotExist(path))
     } else if !path.join("libstd").exists() {
         Err(RustSrcPathError::NotRustSourceTree(path.join("libstd")))
     } else {

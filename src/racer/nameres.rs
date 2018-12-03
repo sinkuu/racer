@@ -1447,7 +1447,7 @@ pub fn resolve_name(
         if let Some(Ty::Match(m)) =
             typeinf::get_type_of_self(pos, filepath, true, msrc.as_src(), session)
         {
-            out.push(m.clone());
+            out.push(m);
         }
     }
 
