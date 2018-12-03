@@ -783,7 +783,7 @@ impl FileCache {
         let source = self
             .loader
             .load_file(filepath)
-            .expect(&format!("Failed load file {:?}", filepath));
+            .unwrap_or_else(|e| panic!("Failed load file {:?}: {}", filepath, e));
         let source = Rc::new(RawSource::new(source));
         self.raw_map
             .borrow_mut()
